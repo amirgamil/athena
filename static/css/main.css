@@ -1,0 +1,50 @@
+html,
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 18px;
+
+    --fg: #222;
+    --bg: #fafafa;
+
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+}
+
+button {
+    font-family: 'Inter', system-ui, sans-serif;
+    border: 0;
+    outline: 0;
+    outline: none;
+    background-color: var(--bg);
+    padding: 0;
+    text-decoration: none;
+}
+
+main.app {
+    max-width: 800px;
+    padding: 2em 0;
+    margin: 0 auto;
+    width: calc(100% - 2em);
+}
+
+button.add {
+    float: right;
+    font-size: 1.4em;
+}
+
+.sub {
+    opacity: .6;
+    font-size: .8em;
+    margin: 0;
+    margin-top: .8em;
+}
+
+.header {
+    align-items: center;
+}
+
+.footer {
+
+}
