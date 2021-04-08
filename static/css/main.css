@@ -19,6 +19,7 @@ button {
     outline: none;
     background-color: var(--bg);
     padding: 0;
+    opacity: 0.4;
     text-decoration: none;
 }
 
@@ -29,9 +30,13 @@ main.app {
     width: calc(100% - 2em);
 }
 
+button:hover {
+   opacity: 1;
+}
+
 button.add {
     float: right;
-    font-size: 1.4em;
+    font-size: 2em;
 }
 
 .sub {
@@ -43,8 +48,4 @@ button.add {
 
 .header {
     align-items: center;
-}
-
-.footer {
-
 }
