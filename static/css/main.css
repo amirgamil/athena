@@ -12,14 +12,17 @@ body {
     min-height: 100vh;
 }
 
+body.dark {
+    --fg: #fafafa;
+    --bg: #222;
+}
+
 header,
 .header-right {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
-
-
 
 .header-left {
     flex-grow: 1;
@@ -29,8 +32,9 @@ button {
     font-family: 'Inter', system-ui, sans-serif;
     border: 0;
     outline: 0;
-    outline: none;
     background-color: var(--bg);
+    color: var(--fg);
+    outline: none;
     padding: 0.5em 0.5em;
     opacity: 0.4;
     text-decoration: none;
@@ -57,9 +61,10 @@ textarea {
 }
 
 
-button:hover {
+button:hover, a:hover {
    opacity: 1;
 }
+
 
 button.add {
     font-size: 2em;
@@ -92,6 +97,7 @@ textarea,
     box-sizing: border-box;
     border: none;
     width: 100%;
+    color: var(--fg);
     min-height: 2em;
     line-height: 1.5em;
     margin: 0;
@@ -133,3 +139,7 @@ textarea {
     padding-bottom: 1.5em;
 }
 
+a {
+    text-decoration: underline;
+    color: var(--fg);
+}

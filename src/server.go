@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -46,9 +45,6 @@ func getThoughts(w http.ResponseWriter, r *http.Request) {
 	jsonFile, _ := os.Open(dbPath)
 	byteArray, _ := ioutil.ReadAll(jsonFile)
 	json.Unmarshal(byteArray, &thoughts)
-	for _, smt := range thoughts {
-		fmt.Println(smt.H)
-	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(thoughts)
 }

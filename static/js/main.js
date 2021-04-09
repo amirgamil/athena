@@ -162,8 +162,8 @@ class App extends Component {
        this.list  = new ThoughtList(this.store, (data) => this.store.remove(data));
        this.date = new Date();
        this.save = bounce(this.save.bind(this), 800);
-		
-
+	   this._loading = false;
+	   this._lastSaved = new Date();
        this.store.fetch()
                 .then(() => {
                     this.bind(this.store, this.save);
@@ -173,11 +173,23 @@ class App extends Component {
     }
 
     save() {
+		if (this._lastSaved === new Date()) {
+			return;
+		}
+		this._loading = true;
+		this.render();
         this.store.save()
 				.then(() => {
-					console.log("saved!")
+					console.log("saved!");
 				}).catch(error => {
 					console.log(error);
+				}).finally(() => {
+					setTimeout(() => {
+						this._loading = false;
+						this._lastSaved = new Date();
+						this.render();
+						// adding artificial delay makes this easy to see as a user.
+					}, 500);
 				});
     }
 
@@ -186,13 +198,22 @@ class App extends Component {
     }
 
     compose() {
-       return jdom
+		const hour = new Date().getHours();
+		if (hour > 20 || hour < 7) {
+			console.log(document.documentElement);
+			document.body.classList.add('dark');
+			document.documentElement.style.color = '#222';
+		} else {
+			document.body.classList.remove('dark');
+			document.documentElement.style.color = '#fafafa';
+		}
+		return jdom
         `<main class="app" oninput="${this.save}">
             <header>
                 <div class="header-left>
                 <h1>${fmtDate(this.date)}</h1>
                 <p class="sub">
-                    Last saved ${relativeDate(new Date())}
+                    ${this._loading ? "Saving..." : relativeDate(this._lastSaved)}
                 </p>
                 </div>
                 <div class = "header-right">
@@ -211,7 +232,10 @@ class App extends Component {
                     Built with love by
                     <a href = "http://amirbolous.com">
                         Amir
-                    </a>
+                    </a> and inspired by 
+					<a href = "https://github.com/thesephist/pico">
+						Pico
+					</a>
                 </p>
             </footer>
        </main>`;
