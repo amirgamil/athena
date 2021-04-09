@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -13,8 +14,8 @@ import (
 const dbPath = "./data.json"
 
 type thought struct {
-	content string
-	tags    []string
+	h string
+	b string
 }
 
 func ensureDataExists() {
@@ -32,12 +33,18 @@ func ensureDataExists() {
 
 }
 
-func getThought(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "yay, you tried to get a thought")
+func getThoughts(w http.ResponseWriter, r *http.Request) {
+	jsonFile, _ := os.Open(dbPath)
+	json.NewEncoder(w).Encode(jsonFile)
 }
 
 func writeThought(w http.ResponseWriter, r *http.Request) {
-
+	var thoughts []thought
+	err := json.NewDecoder(r.Body).Decode(&thoughts)
+	if err != nil {
+		return
+	}
+	io.Write(w, json.Marshal(thoughts))
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +72,7 @@ func main() {
 	}
 
 	r.HandleFunc("/", index)
-	r.Methods("GET").Path("/data").HandlerFunc(getThought)
+	r.Methods("GET").Path("/data").HandlerFunc(getThoughts)
 	r.Methods("POST").Path("/data").HandlerFunc(writeThought)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	log.Printf("Server listening on %s\n", srv.Addr)

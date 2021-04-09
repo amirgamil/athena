@@ -5,8 +5,40 @@ const {
     ListOf,
 } = window.Torus;
 
+const MONTHS = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+];
+
 function fmtDate(date) {
     return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+function relativeDate(date) {
+    const delta = (new Date() - date) / 1000;
+    if (delta < 60) {
+        return '< 1 min ago';
+    } else if (delta < 3600) {
+        return `${~~(delta / 60)} min ago`;
+    } else if (delta < 86400) {
+        return `${~~(delta / 3600)} hr ago`;
+    } else if (delta < 86400 * 2) {
+        return 'yesterday';
+    } else if (delta < 86400 * 3) {
+        return '2 days ago';
+    } else {
+        return date.toLocaleDateString() + ' ' + formatTime(date);
+    }
 }
 
 // only fire fn once it hasn't been called in delay ms
@@ -25,7 +57,7 @@ class Thought extends Record { }
 //store for handling ordered list of records
 class ThoughtStore extends StoreOf(Thought) {
     fetch() {
-        return fetch("./data")
+        return fetch("/data")
             .then(r => r.json())
             .then(data => {
                 //assign everything to blocks
@@ -34,44 +66,83 @@ class ThoughtStore extends StoreOf(Thought) {
     }
 
     save() {
-        return fetch("./data", {
+        return fetch("/data", {
             method: "POST",
-            body: JSON.stringify(this.seralize()),
+            body: JSON.stringify(this.serialize()),
         });
     }
 }
 
 class ThoughtItem extends Component {
     init(record, removeCallback) {
-        
-    }
-    
-    isCollapsed() {
+        this.isCollapsed = true;
 
+        this.handleTitleInput = evt => this.handleInput("h", evt);
+        this.handleBodyInput = evt => this.handleInput("b", evt);
+        this.removeCallback = removeCallback;
+        this.show = this.show.bind(this);
+        this.setCollapsed = this.setCollapsed.bind(this);
+        this.handleKeydown = this.handleKeydown.bind(this);
+        this.handleRemove = this.handleRemove.bind(this);
+        this.bind(record, data => this.render(data));
     }
-    setCollapsed(c) {
 
+    show() {
+        this.isCollapsed = false;
+        this.render();
     }
+    setCollapsed() {
+        this.isCollapsed = true;
+        this.render();
+    }
+
     handleInput(prop, evt) {
-        
+        this.record.update({[prop]: evt.target.value});
     }
+
     handleKeydown(evt) {
-        
+        if (evt.key === 'Tab') {
+            //stop what would have happened so we can artifically simulate tab
+            evt.preventDefault();
+            const idx = evt.target.selectionStart;
+            if (idx != null) {
+                const text = this.record.get("b").substring(0, idx) + "    " + this.record.get("b").substring(idx + 1);
+                this.record.update({b: text});
+            }
+        }
     }
-    handleToggleCollapse() {
-   
-    }
+
     handleRemove() {
-
+        this.removeCallback(this.record);
     }
 
-    compose({h}) {
-        return jdom`
-                <div class="head">
-                    <textarea>
-                    </textarea>
+    compose({h, b}) {
+        return jdom`<div class = "block>
+                <div class="block-heading">
+                    <input class = "title"
+                    value="${h}"
+                    placeholder="thought"
+                    oninput=${this.handleTitleInput}/>
+                    <div class = "button-bar">
+                        <button class="toggle"
+                        onclick="${() => this.isCollapsed ? this.show() : this.setCollapsed()}">
+                        ${this.isCollapsed ? "↓" : "→"}
+                        </button>
+                        <button class="close"
+                        onclick="${this.handleRemove}">
+                        X
+                        </button>
+                    </div>
                 </div>
-        `
+                ${this.isCollapsed ? null : jdom`<div class="block-body">
+                <textarea class="thought"
+                placeholder="Enter your thought here"
+                value="${b}"
+                onkeydown="${this.handleKeydown}"
+                oninput="${this.handleBodyInput}" />
+                <div class = "p-heights ${b.endsWith('\n') ? 'endline' : ''}">${b}</div>
+            </div>`}
+            </div>`;
     }
 }
 
@@ -85,10 +156,13 @@ class ThoughtList extends ListOf(ThoughtItem) {
 
 class App extends Component {
     init() {
+		
        this.store = new ThoughtStore();
-       this.list  = new ThoughtList(this.store);
-        
+       this.list  = new ThoughtList(this.store, (data) => this.store.remove(data));
+       this.date = new Date();
        this.save = bounce(this.save.bind(this), 800);
+		
+
        this.store.fetch()
                 .then(() => {
                     this.bind(this.store, this.save);
@@ -98,7 +172,12 @@ class App extends Component {
     }
 
     save() {
-        //do stuff
+        this.store.save()
+				.then(() => {
+					console.log("saved!")
+				}).catch(error => {
+					console.log(error);
+				});
     }
 
     remove() {
@@ -106,21 +185,29 @@ class App extends Component {
     }
 
     compose() {
-       return jdom 
-        `<main class="app">
+       return jdom
+        `<main class="app" oninput="${this.save}">
             <header>
-                <h1>Athena</h1>
-                <button class = "add" onclick=${() => this.store.create({h: ''})}>
-                +
-                </button>
+                <div class="header-left>
+                <h1>${fmtDate(this.date)}</h1>
                 <p class="sub">
-                    Last saved soon
+                    Last saved ${relativeDate(new Date())}
                 </p>
+                </div>
+                <div class = "header-right">
+                    <button class = "add" onclick=${() => {
+                        this.store.create({h: '', b: ''});
+                        console.log(this.store.summarize());
+                    }}>
+                    +
+                    </button>
+                </div>
+
             </header>
-            ${this.list.nodes}
+            ${this.list.node}
             <footer>
                 <p>
-                    Built with love by 
+                    Built with love by
                     <a href = "http://amirbolous.com">
                         Amir
                     </a>

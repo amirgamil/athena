@@ -12,40 +12,124 @@ body {
     min-height: 100vh;
 }
 
+header,
+.header-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+
+.header-left {
+    flex-grow: 1;
+}
+
 button {
     font-family: 'Inter', system-ui, sans-serif;
     border: 0;
     outline: 0;
     outline: none;
     background-color: var(--bg);
-    padding: 0;
+    padding: 0.5em 0.5em;
     opacity: 0.4;
     text-decoration: none;
 }
 
-main.app {
+.app {
     max-width: 800px;
     padding: 2em 0;
     margin: 0 auto;
     width: calc(100% - 2em);
+    
 }
+
+.button-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.toggle,
+.close,
+textarea {
+    font-size: 1em;
+}
+
 
 button:hover {
    opacity: 1;
 }
 
 button.add {
-    float: right;
     font-size: 2em;
 }
 
-.sub {
+footer, p.sub {
     opacity: .6;
     font-size: .8em;
-    margin: 0;
-    margin-top: .8em;
 }
 
-.header {
+.block {
+    width: 100%;
+}
+
+
+.block-body {
+    position: relative;
+}
+
+.block-heading {
+    display: flex;
     align-items: center;
 }
+
+
+
+input,
+textarea,
+.p-heights {
+    box-sizing: border-box;
+    border: none;
+    width: 100%;
+    min-height: 2em;
+    line-height: 1.5em;
+    margin: 0;
+    background: transparent;
+    outline: none;
+    font-family: 'Inter';
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.block-heading input {
+    font-weight: 700;
+}
+
+textarea {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    resize: none;
+    position: absolute;
+}
+
+.title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.block-body {
+    display: flex;
+}
+
+.p-heights {
+    visibility: hidden;
+}
+
+.p-heights.endline {
+    padding-bottom: 1.5em;
+}
+
