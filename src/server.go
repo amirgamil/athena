@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,8 +16,14 @@ import (
 const dbPath = "./data.json"
 
 type thought struct {
-	h string
-	b string
+	H string `json:"h"`
+	B string `json:"b"`
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
 
 func ensureDataExists() {
@@ -34,17 +42,24 @@ func ensureDataExists() {
 }
 
 func getThoughts(w http.ResponseWriter, r *http.Request) {
+	var thoughts []thought
 	jsonFile, _ := os.Open(dbPath)
-	json.NewEncoder(w).Encode(jsonFile)
+	byteArray, _ := ioutil.ReadAll(jsonFile)
+	json.Unmarshal(byteArray, &thoughts)
+	for _, smt := range thoughts {
+		fmt.Println(smt.H)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(thoughts)
 }
 
-func writeThought(w http.ResponseWriter, r *http.Request) {
+func writeThoughts(w http.ResponseWriter, r *http.Request) {
 	var thoughts []thought
 	err := json.NewDecoder(r.Body).Decode(&thoughts)
-	if err != nil {
-		return
-	}
-	io.Write(w, json.Marshal(thoughts))
+	check(err)
+	data, err := json.MarshalIndent(thoughts, "", "")
+	check(err)
+	ioutil.WriteFile(dbPath, data, 0644)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +88,7 @@ func main() {
 
 	r.HandleFunc("/", index)
 	r.Methods("GET").Path("/data").HandlerFunc(getThoughts)
-	r.Methods("POST").Path("/data").HandlerFunc(writeThought)
+	r.Methods("POST").Path("/data").HandlerFunc(writeThoughts)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	log.Printf("Server listening on %s\n", srv.Addr)
 	log.Fatal(srv.ListenAndServe())

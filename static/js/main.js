@@ -61,11 +61,12 @@ class ThoughtStore extends StoreOf(Thought) {
             .then(r => r.json())
             .then(data => {
                 //assign everything to blocks
-                this.reset(data.map(thought => new this.Thought(thought)));
+                this.reset(data.map(thought => new Thought(thought)));
             });
     }
 
     save() {
+		console.log(JSON.stringify(this.serialize()));
         return fetch("/data", {
             method: "POST",
             body: JSON.stringify(this.serialize()),
