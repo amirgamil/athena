@@ -66,7 +66,6 @@ class ThoughtStore extends StoreOf(Thought) {
     }
 
     save() {
-		console.log(JSON.stringify(this.serialize()));
         return fetch("/data", {
             method: "POST",
             body: JSON.stringify(this.serialize()),
@@ -78,11 +77,22 @@ class ThoughtItem extends Component {
     init(record, removeCallback) {
         this.isCollapsed = true;
 
+		const tags = record.data.T;
+		let buildString = "";
+		if (tags != null) {
+			tags.forEach((tag, _) => {
+				buildString += "#" + tag + " ";
+			});
+		}
+		
+		this.tagString = buildString;
         this.handleTitleInput = evt => this.handleInput("h", evt);
         this.handleBodyInput = evt => this.handleInput("b", evt);
+		this.handleTagInput = this.handleTagInput.bind(this);
         this.removeCallback = removeCallback;
         this.show = this.show.bind(this);
         this.setCollapsed = this.setCollapsed.bind(this);
+		this.handleTagKeydown = this.handleTagKeydown.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleRemove = this.handleRemove.bind(this);
         this.bind(record, data => this.render(data));
@@ -97,9 +107,23 @@ class ThoughtItem extends Component {
         this.render();
     }
 
+	handleTagInput(evt) {
+		this.tagString = evt.target.value;
+		this.render();
+	}
+
     handleInput(prop, evt) {
         this.record.update({[prop]: evt.target.value});
     }
+
+	handleTagKeydown(evt) {
+		if (evt.key === 'Enter') {
+			evt.target.blur();
+			let tags = this.tagString.split('').join('').split('#');
+			tags = tags.length > 1 ? tags.slice(1) : [];
+			this.record.update({t: tags})
+		}
+	}
 
     handleKeydown(evt) {
         if (evt.key === 'Tab') {
@@ -117,13 +141,13 @@ class ThoughtItem extends Component {
         this.removeCallback(this.record);
     }
 
-    compose({h, b}) {
+    compose({h, b, t}) {
         return jdom`<div class = "block>
                 <div class="block-heading">
                     <input class = "title"
                     value="${h}"
                     placeholder="thought"
-                    oninput=${this.handleTitleInput}/>
+                    oninput="${this.handleTitleInput}"/>
                     <div class = "button-bar">
                         <button class="toggle"
                         onclick="${() => this.isCollapsed ? this.show() : this.setCollapsed()}">
@@ -135,14 +159,20 @@ class ThoughtItem extends Component {
                         </button>
                     </div>
                 </div>
-                ${this.isCollapsed ? null : jdom`<div class="block-body">
-                <textarea class="thought"
-                placeholder="Enter your thought here"
-                value="${b}"
-                onkeydown="${this.handleKeydown}"
-                oninput="${this.handleBodyInput}" />
-                <div class = "p-heights ${b.endsWith('\n') ? 'endline' : ''}">${b}</div>
-            </div>`}
+				<input class = "tags"
+					placeholder = "#tags"
+					oninput="${this.handleTagInput}"
+					onkeydown="${this.handleTagKeydown}"
+					value="${this.tagString}"/>
+                ${this.isCollapsed ? null : jdom`
+				<div class="block-body">
+					<textarea class="thought"
+					placeholder="Enter your thought here"
+					value="${b}"
+					onkeydown="${this.handleKeydown}"
+					oninput="${this.handleBodyInput}" />
+					<div class = "p-heights ${b.endsWith('\n') ? 'endline' : ''}">${b}</div>
+            	</div>`}
             </div>`;
     }
 }
@@ -158,17 +188,18 @@ class ThoughtList extends ListOf(ThoughtItem) {
 class App extends Component {
     init() {
 		
-       this.store = new ThoughtStore();
-       this.list  = new ThoughtList(this.store, (data) => this.store.remove(data));
-       this.date = new Date();
-       this.save = bounce(this.save.bind(this), 800);
-	   this._loading = false;
-	   this._lastSaved = new Date();
-       this.store.fetch()
+       	this.store = new ThoughtStore();
+       	this.list  = new ThoughtList(this.store, (data) => this.store.remove(data));
+       	this.date = new Date();
+       	this.save = bounce(this.save.bind(this), 800);
+	   	this._loading = false;
+	   	this._lastSaved = new Date();
+       	this.store.fetch()
                 .then(() => {
                     this.bind(this.store, this.save);
                     this.render();
                 })
+	   	this._interval = setInterval(this.render.bind(this), 60 * 1000);
 
     }
 
@@ -180,13 +211,12 @@ class App extends Component {
 		this.render();
         this.store.save()
 				.then(() => {
-					console.log("saved!");
+					this._loading = false;
+					this._lastSaved = new Date();
 				}).catch(error => {
 					console.log(error);
 				}).finally(() => {
 					setTimeout(() => {
-						this._loading = false;
-						this._lastSaved = new Date();
 						this.render();
 						// adding artificial delay makes this easy to see as a user.
 					}, 500);
@@ -195,12 +225,12 @@ class App extends Component {
 
     remove() {
         super.remove();
+		clearInterval(this._interval);
     }
 
     compose() {
 		const hour = new Date().getHours();
-		if (hour > 20 || hour < 7) {
-			console.log(document.documentElement);
+		if (hour > 19 || hour < 7) {
 			document.body.classList.add('dark');
 			document.documentElement.style.color = '#222';
 		} else {
@@ -218,7 +248,7 @@ class App extends Component {
                 </div>
                 <div class = "header-right">
                     <button class = "add" onclick=${() => {
-                        this.store.create({h: '', b: ''});
+                        this.store.create({h: '', b: '', t: []});
                         console.log(this.store.summarize());
                     }}>
                     +

@@ -15,8 +15,9 @@ import (
 const dbPath = "./data.json"
 
 type thought struct {
-	H string `json:"h"`
-	B string `json:"b"`
+	H string   `json:"h"`
+	B string   `json:"b"`
+	T []string `json: "t"`
 }
 
 func check(e error) {

@@ -80,10 +80,6 @@ footer, p.sub {
 }
 
 
-.block-body {
-    position: relative;
-}
-
 .block-heading {
     display: flex;
     align-items: center;
@@ -108,8 +104,13 @@ textarea,
     white-space: pre-wrap;
 }
 
-.block-heading input {
+.tags, .block-heading input {
     font-weight: 700;
+}
+
+.tags {
+    font-size: .9em;
+    opacity: .6;
 }
 
 textarea {
@@ -127,8 +128,10 @@ textarea {
     font-weight: bold;
 }
 
+
 .block-body {
     display: flex;
+    position: relative;
 }
 
 .p-heights {
