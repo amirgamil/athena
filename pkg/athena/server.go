@@ -1,4 +1,4 @@
-package main
+package athena
 
 import (
 	"encoding/json"

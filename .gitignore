@@ -1,3 +1,20 @@
 .DS_Store
 static/.DS_Store
 data.json
+athena.service
+Pkg/main.go
+server
+  
+# Binaries for programs and plugins
+plume
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
