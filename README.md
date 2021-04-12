@@ -1,4 +1,4 @@
-# Athena
+# Athena 📦
 A database to dump your thoughts and not forget them. Athena is a simple tool for recording snippets of thought and tagging them by keywords. Instead of being opinionated about how to record data and filled with features, Athena is a simple interface for adding and tagging thoughts. This project is inspired by [Pico]()
 
 
