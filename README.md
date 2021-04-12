@@ -8,7 +8,7 @@ This is a personal workflow tool but check the instructions for how to deploy th
 
 
 # Deploying
-You can run Athena on your local computer simple by cloning the repo, navigating to the main directory, and running
+You can run Athena on your local computer simply by cloning the repo, navigating to the main directory, and running
 ```
 go run pkg/athena/server.go
 ```
