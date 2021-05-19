@@ -1,0 +1,26 @@
+[Unit]
+Description=athena database
+
+[Service]
+Type=simple
+User=athena
+LimitNOFILE=256
+
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=60
+
+WorkingDirectory=/home/amirbolous/athena/
+ExecStart=/home/amirbolous/athena/athena
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/athena
+ExecStartPre=/bin/chown syslog:adm /var/log/athena
+ExecStartPre=/bin/chmod 755 /var/log/athena
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=athena
+
+[Install]
+WantedBy=multi-user.target

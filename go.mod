@@ -1,4 +1,4 @@
-module github.com/amirbolous/athena
+module github.com/amirbolous/lispysandbox
 
 go 1.14
 

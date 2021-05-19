@@ -1,4 +1,4 @@
-package main
+package lispysandbox
 
 import (
 	"encoding/json"
@@ -11,14 +11,6 @@ import (
 
 	"github.com/gorilla/mux"
 )
-
-const dbPath = "./data.json"
-
-type thought struct {
-	H string   `json:"h"`
-	B string   `json:"b"`
-	T []string `json: "t"`
-}
 
 func check(e error) {
 	if e != nil {
@@ -84,8 +76,7 @@ func main() {
 	}
 
 	r.HandleFunc("/", index)
-	r.Methods("GET").Path("/data").HandlerFunc(getThoughts)
-	r.Methods("POST").Path("/data").HandlerFunc(writeThoughts)
+	r.Methods("POST").Path("/code").HandlerFunc(writeThoughts)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	log.Printf("Server listening on %s\n", srv.Addr)
 	log.Fatal(srv.ListenAndServe())
