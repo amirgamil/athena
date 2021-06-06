@@ -131,8 +131,10 @@ class ThoughtItem extends Component {
             evt.preventDefault();
             const idx = evt.target.selectionStart;
             if (idx != null) {
-                const text = this.record.get("b").substring(0, idx) + "    " + this.record.get("b").substring(idx + 1);
+                console.log(this.record.get("b")[idx])
+                const text = this.record.get("b").substring(0, idx) + "\t" + this.record.get("b").substring(idx);
                 this.record.update({b: text});
+                evt.target.setSelectionRange(idx + 1, idx + )
             }
         }
     }

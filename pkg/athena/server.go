@@ -1,4 +1,4 @@
-package main
+package athena
 
 import (
 	"encoding/json"
@@ -70,7 +70,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, indexFile)
 }
 
-func main() {
+func Start() {
 	//create data.json if it doesn't exit
 	ensureDataExists()
 
