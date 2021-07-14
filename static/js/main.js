@@ -54,9 +54,21 @@ const bounce = (fn, delay) => {
 //smallest unit of mutuable data
 class Thought extends Record { }
 
+//act as env variable for static deployment
+const SERVERLESS_DEPLOYMENT = true;
+
 //store for handling ordered list of records
 class ThoughtStore extends StoreOf(Thought) {
     fetch() {
+        if (SERVERLESS_DEPLOYMENT) {
+            return new Promise((resolve, reject) => {
+                const data = JSON.parse(window.localStorage.getItem('store'));
+                if (data) {
+                    this.reset(data.map(thought => new Thought(thought)));
+                }
+                resolve();
+            })
+        }
         return fetch("/data")
             .then(r => r.json())
             .then(data => {
@@ -66,6 +78,12 @@ class ThoughtStore extends StoreOf(Thought) {
     }
 
     save() {
+        if (SERVERLESS_DEPLOYMENT) {
+            return new Promise((resolve, reject) => {
+                window.localStorage.setItem('store', JSON.stringify(this.serialize()));
+                resolve();
+            })
+        }
         return fetch("/data", {
             method: "POST",
             body: JSON.stringify(this.serialize()),
@@ -134,7 +152,7 @@ class ThoughtItem extends Component {
                 console.log(this.record.get("b")[idx])
                 const text = this.record.get("b").substring(0, idx) + "\t" + this.record.get("b").substring(idx);
                 this.record.update({b: text});
-                evt.target.setSelectionRange(idx + 1, idx + )
+                evt.target.setSelectionRange(idx + 1, idx + 1)
             }
         }
     }
@@ -213,8 +231,9 @@ class App extends Component {
 		this.render();
         this.store.save()
 				.then(() => {
-					this._loading = false;
-					this._lastSaved = new Date();
+                    this._loading = false;
+                    this._lastSaved = new Date();
+                    console.log("hello");
 				}).catch(error => {
 					console.log(error);
 				}).finally(() => {
@@ -263,8 +282,7 @@ class App extends Component {
                 <p>
                     Built with love by
                     <a href = "http://amirbolous.com">
-                        Amir
-                    </a> and inspired by 
+                        Amir</a> and inspired by 
 					<a href = "https://github.com/thesephist/pico">
 						Pico
 					</a>
