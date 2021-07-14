@@ -54,9 +54,21 @@ const bounce = (fn, delay) => {
 //smallest unit of mutuable data
 class Thought extends Record { }
 
+//act as env variable for static deployment
+const SERVERLESS_DEPLOYMENT = true;
+
 //store for handling ordered list of records
 class ThoughtStore extends StoreOf(Thought) {
     fetch() {
+        if (SERVERLESS_DEPLOYMENT) {
+            return new Promise((resolve, reject) => {
+                const data = JSON.parse(window.localStorage.getItem('store'));
+                if (data) {
+                    this.reset(data.map(thought => new Thought(thought)));
+                }
+                resolve();
+            })
+        }
         return fetch("/data")
             .then(r => r.json())
             .then(data => {
@@ -66,6 +78,12 @@ class ThoughtStore extends StoreOf(Thought) {
     }
 
     save() {
+        if (SERVERLESS_DEPLOYMENT) {
+            return new Promise((resolve, reject) => {
+                window.localStorage.setItem('store', JSON.stringify(this.serialize()));
+                resolve();
+            })
+        }
         return fetch("/data", {
             method: "POST",
             body: JSON.stringify(this.serialize()),
