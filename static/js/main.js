@@ -92,7 +92,6 @@ class ThoughtItem extends Component {
         this.removeCallback = removeCallback;
         this.show = this.show.bind(this);
         this.setCollapsed = this.setCollapsed.bind(this);
-		this.handleTagKeydown = this.handleTagKeydown.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleRemove = this.handleRemove.bind(this);
         this.bind(record, data => this.render(data));
@@ -110,20 +109,14 @@ class ThoughtItem extends Component {
 	handleTagInput(evt) {
 		this.tagString = evt.target.value;
 		this.render();
+        let tags = this.tagString.split('').join('').split('#');
+        tags = tags.length > 1 ? tags.slice(1) : [];
+        this.record.update({t: tags})
 	}
 
     handleInput(prop, evt) {
         this.record.update({[prop]: evt.target.value});
     }
-
-	handleTagKeydown(evt) {
-		if (evt.key === 'Enter') {
-			evt.target.blur();
-			let tags = this.tagString.split('').join('').split('#');
-			tags = tags.length > 1 ? tags.slice(1) : [];
-			this.record.update({t: tags})
-		}
-	}
 
     handleKeydown(evt) {
         if (evt.key === 'Tab') {
@@ -164,7 +157,6 @@ class ThoughtItem extends Component {
 				<input class = "tags"
 					placeholder = "#tags"
 					oninput="${this.handleTagInput}"
-					onkeydown="${this.handleTagKeydown}"
 					value="${this.tagString}"/>
                 ${this.isCollapsed ? null : jdom`
 				<div class="block-body">
